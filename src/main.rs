@@ -17,7 +17,7 @@ use winapi::um::winuser::SW_SHOWDEFAULT;
 const REPO_URL: &str = "https://api.github.com/repos/D4rkks/r.e.p.o-cheat/releases";
 const FILES: &[&str] = &["r.e.p.o.cheat.dll", "SharpMonoInjector.dll", "smi.exe"];
 const HASH_FILE: &str = "verified_hashes.json";
-const INNER_WIDTH: usize = 65;
+const INNER_WIDTH: usize = 78;
 
 fn main() {
     if !is_admin() {
@@ -384,35 +384,55 @@ fn wait_for_process(target: &str) {
     }
 }
 
+fn print_command_line(command: &str) {
+    // Consistent INNER_WIDTH with the rest of the application
+    // Original code had 80 here but 78 elsewhere
+    const CMD_WIDTH: usize = 78;
+
+    println!("  │ {:<width$} │", command, width = CMD_WIDTH);
+}
+
 fn inject_dll() {
     println!("\n");
     println!("  ┌───────────────────────────────────────────────────────────────┐");
-    println!("  │ Preparing to execute injection command                      │");
-    println!("  │ Target: REPO process                                        │");
-    println!("  │ Method: SharpMonoInjector                                   │");
+    println!("  │ Preparing to execute injection command                        │");
+    println!("  │ Target: REPO process                                          │");
+    println!("  │ Method: SharpMonoInjector                                     │");
     println!("  └───────────────────────────────────────────────────────────────┘");
+
     let dest_dir = get_dest_dir();
     let command = format!(
         "Start-Process -NoNewWindow -FilePath 'cmd.exe' -ArgumentList '/c cd {} && smi.exe inject -p REPO -a r.e.p.o.cheat.dll -n r.e.p.o_cheat -c Loader -m Init'",
         dest_dir
     );
-    print_box_line("smi.exe inject -p REPO -a r.e.p.o.cheat.dll -n r.e.p.o_cheat -c Loader -m Init");
+
+    // Use a shorter command display for better formatting
+    println!("  ┌───────────────────────────────────────────────────────────────┐");
+    print_command_line("smi.exe inject -p REPO -a r.e.p.o.cheat.dll -n r.e.p.o_cheat -c Loader -m Init");
+    println!("  └───────────────────────────────────────────────────────────────┘");
+
     thread::sleep(Duration::from_millis(800));
+
     let status = Command::new("powershell")
         .arg("-Command")
         .arg(&command)
         .status()
         .expect("Failed to execute injector via PowerShell");
+
     if !status.success() {
         println!("\n");
-        println!("  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓");
-        println!("  ▓                                               ▓");
-        println!("  ▓  [ERROR] INJECTION FAILED!                    ▓");
-        println!("  ▓  PowerShell command returned error code       ▓");
-        println!("  ▓                                               ▓");
-        println!("  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓");
+        println!("  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓");
+        println!("  ▓                                                           ▓");
+        println!("  ▓  [ERROR] INJECTION FAILED!                                ▓");
+        println!("  ▓  PowerShell command returned error code                   ▓");
+        println!("  ▓                                                           ▓");
+        println!("  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓");
         exit(1);
     }
-    print_box_line("SharpMonoInjector reported successful execution");
+
+    println!("  ┌───────────────────────────────────────────────────────────────┐");
+    println!("  │ SharpMonoInjector reported successful execution               │");
+    println!("  └───────────────────────────────────────────────────────────────┘");
+
     thread::sleep(Duration::from_millis(500));
 }
